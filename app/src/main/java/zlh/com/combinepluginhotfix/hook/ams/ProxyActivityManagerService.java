@@ -1,5 +1,7 @@
 package zlh.com.combinepluginhotfix.hook.ams;
 
+import android.content.ComponentName;
+import android.content.Intent;
 import android.util.Log;
 
 import java.lang.reflect.Field;
@@ -7,11 +9,14 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import zlh.com.combinepluginhotfix.StubActivity;
+
 /**
  * Created by shs1330 on 2018/3/12.
  */
 
 public class ProxyActivityManagerService implements InvocationHandler {
+    public static final String TARGET_ACTIVITY = "TARGET_ACTIVITY";
     private static final String TAG = "ProxyActivityManagerSer";
     private Object mBaseAms;
     public ProxyActivityManagerService(Object object) {
@@ -21,6 +26,24 @@ public class ProxyActivityManagerService implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Log.d(TAG, "invoke: " + method.getName());
+        if (method.getName().equals("startActivity")) {
+            Intent rawIntent = null;
+            int index = 0;
+            for (int i = 0; i < args.length; i++) {
+                if (args[i] instanceof Intent) {
+                    rawIntent = (Intent) args[i];
+                    index = i;
+                    break;
+                }
+            }
+            String packageName = "zlh.com.combinepluginhotfix";
+            ComponentName c = new ComponentName(packageName, StubActivity.class.getCanonicalName());
+            Intent newIntent = new Intent();
+            newIntent.setComponent(c);
+            Log.d(TAG, "invoke: " + rawIntent);
+            newIntent.putExtra(TARGET_ACTIVITY, rawIntent);
+            args[index] = newIntent;
+        }
         return method.invoke(mBaseAms, args);
     }
 
