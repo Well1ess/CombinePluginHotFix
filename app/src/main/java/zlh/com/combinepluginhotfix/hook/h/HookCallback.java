@@ -18,6 +18,10 @@ import zlh.com.combinepluginhotfix.hook.ams.ProxyActivityManagerService;
 
 public class HookCallback implements Handler.Callback {
     private static final String TAG = "HookCallback";
+    private Handler mH;
+    public HookCallback(Handler mH) {
+        this.mH = mH;
+    }
     @Override
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
@@ -28,12 +32,10 @@ public class HookCallback implements Handler.Callback {
                     Intent changedIntent = (Intent) intentField.get(msg.obj);
 
                     Intent target = changedIntent.getParcelableExtra(ProxyActivityManagerService.TARGET_ACTIVITY);
-                    if (target == null)
+                    Log.d(TAG, "target  - handleMessage: " + target);
+                    if (target != null)
                     {
-                        return false;
-                    }
-                    else
-                    {
+                        changedIntent.setComponent(target.getComponent());
                         Field activityInfoField = msg.obj.getClass().getDeclaredField("activityInfo");
                         activityInfoField.setAccessible(true);
                         ActivityInfo activityInfo = (ActivityInfo) activityInfoField.get(msg.obj);
@@ -48,7 +50,8 @@ public class HookCallback implements Handler.Callback {
                 Log.d(TAG, "handleMessage: " + msg.obj.getClass().getName());
             }break;
         }
-        return false;
+        mH.handleMessage(msg);
+        return true;
     }
 
     public static void hook() {
@@ -64,7 +67,7 @@ public class HookCallback implements Handler.Callback {
 
             Field mHField = Handler.class.getDeclaredField("mCallback");
             mHField.setAccessible(true);
-            mHField.set(mHObject, new HookCallback());
+            mHField.set(mHObject, new HookCallback((Handler) mHObject));
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {

@@ -1,5 +1,6 @@
 package zlh.com.combinepluginhotfix;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,8 +20,12 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.tv_show).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, StubActivity.class));
+                Intent intent = new Intent();
+                intent.setComponent(new ComponentName("nim.shs1330.netease.com.pluginone",
+                        "nim.shs1330.netease.com.pluginone.MainActivity"));
+                startActivity(intent);
             }
         });
+
     }
 }
