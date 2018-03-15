@@ -39,9 +39,8 @@ public class MainActivity extends AppCompatActivity {
                 ClassLoader classLoader = ApkLoader.getPluginClassLoader(App.PLUGIN_ONE_PKGNAME);
                 try {
                     Class fragmentClazz = classLoader.loadClass("nim.shs1330.netease.com.pluginone.PluginOneMainFragment");
-                    Fragment fragmentz = (Fragment) fragmentClazz.newInstance();
-                    //Fragment fragment = PluginOneMainFragment.newInstance();
-                    transaction.replace(R.id.flyt_contrainer, fragmentz);
+                    Fragment fragment = (Fragment) fragmentClazz.newInstance();
+                    transaction.replace(R.id.flyt_contrainer, fragment);
                     transaction.commit();
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
