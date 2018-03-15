@@ -13,6 +13,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import zlh.com.combinepluginhotfix.application.App;
+import zlh.com.combinepluginhotfix.tool.PH;
+
 /**
  * Created by shs1330 on 2018/3/12.
  * Activity的创建要经过Instrumentation
@@ -23,6 +26,10 @@ public class CustomInstrumentation extends Instrumentation {
     public final static String execStartActivity = "execStartActivity";
     private Instrumentation original;
     private Method execStartActivityMethod;
+    private static volatile CustomInstrumentation instance;
+    public static synchronized CustomInstrumentation getInstance() {
+        return instance;
+    }
 
     public ActivityResult execStartActivity(
             Context who, IBinder contextThread, IBinder token, Activity target,
@@ -46,7 +53,18 @@ public class CustomInstrumentation extends Instrumentation {
 
 
     public void callApplicationOnCreate(Application app) {
-        Log.d(TAG, "callApplicationOnCreate: ");
+        if (!app.getApplicationInfo().packageName.equals(App.SOURCE_PKGNAME)) {
+            try {
+                Log.d(TAG, "callApplicationOnCreate: " + app.getClass().getName());
+                Field thatField = app.getClass().getDeclaredField("that");
+                thatField.setAccessible(true);
+                thatField.set(null, PH.getBaseContext());
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
         super.callApplicationOnCreate(app);
     }
 
@@ -61,6 +79,7 @@ public class CustomInstrumentation extends Instrumentation {
             mInstrumentationFiled.setAccessible(true);
             Instrumentation original = (Instrumentation) mInstrumentationFiled.get(activityThreadObject);
             CustomInstrumentation custom = new CustomInstrumentation();
+            instance = custom;
             custom.original = original;
             mInstrumentationFiled.set(activityThreadObject, custom);
         } catch (ClassNotFoundException e) {

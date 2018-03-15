@@ -19,18 +19,20 @@ import zlh.com.combinepluginhotfix.tool.PH;
 public class App extends Application {
     private static final String TAG = "App";
     private static final String PLUGIN_ONE = "PluginOne.apk";
+    public static final String SOURCE_PKGNAME = "zlh.com.combinepluginhotfix";
+    public static final String PLUGIN_ONE_PKGNAME = "nim.shs1330.netease.com.pluginone";
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         PH.init(base);
 
-        FileHelper.extractAssets(PLUGIN_ONE);
-        ApkLoader.hook(getFileStreamPath(PLUGIN_ONE));
-
         CustomInstrumentation.hook();
         ProxyActivityManagerService.hook();
         ProxyPackageManagerService.hook();
         HookCallback.hook();
+
+        FileHelper.extractAssets(PLUGIN_ONE);
+        ApkLoader.hook(getFileStreamPath(PLUGIN_ONE));
     }
 
     @Override

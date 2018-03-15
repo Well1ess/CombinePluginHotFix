@@ -1,5 +1,7 @@
 package zlh.com.combinepluginhotfix.hook.loadedapk;
 
+import android.app.Application;
+import android.app.Instrumentation;
 import android.content.pm.ApplicationInfo;
 import android.util.Log;
 
@@ -12,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import zlh.com.combinepluginhotfix.hook.classloader.PluginClassLoader;
+import zlh.com.combinepluginhotfix.hook.instrumentation.CustomInstrumentation;
 import zlh.com.combinepluginhotfix.tool.FileHelper;
 
 /**
@@ -69,9 +72,9 @@ public class ApkLoader {
                     FileHelper.getOptDir(applicationInfo.packageName).getPath(),
                     FileHelper.getPluginLibDir(applicationInfo.packageName).getPath(),
                     ApkLoader.class.getClassLoader());
-            Log.d(TAG, "hook: "  + apkFile.getPath());
-            Log.d(TAG, "hook: "  + FileHelper.getOptDir(applicationInfo.packageName).getPath());
-            Log.d(TAG, "hook: "  + FileHelper.getPluginLibDir(applicationInfo.packageName).getPath());
+            Log.d(TAG, "hook: " + apkFile.getPath());
+            Log.d(TAG, "hook: " + FileHelper.getOptDir(applicationInfo.packageName).getPath());
+            Log.d(TAG, "hook: " + FileHelper.getPluginLibDir(applicationInfo.packageName).getPath());
             Field mClassLoaderFieldField = loadedApk.getClass().getDeclaredField("mClassLoader");
             mClassLoaderFieldField.setAccessible(true);
             mClassLoaderFieldField.set(loadedApk, classLoader);
@@ -81,7 +84,7 @@ public class ApkLoader {
 
             mPackages.put(applicationInfo.packageName, new WeakReference(loadedApk));
 
-            Log.d(TAG, "hook: " + ((WeakReference)(mPackages.get(applicationInfo.packageName))).get());
+            callPluginApplicationCreate(applicationInfo.packageName);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
@@ -93,6 +96,21 @@ public class ApkLoader {
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void callPluginApplicationCreate(String packageName) {
+        Class loadedApk = sLoadedApk.get(packageName).getClass();
+        try {
+            Method makeApplication = loadedApk.getDeclaredMethod("makeApplication", boolean.class, Instrumentation.class);
+            Application app = (Application) makeApplication.invoke(sLoadedApk.get(packageName), false, CustomInstrumentation.getInstance());
+            Log.d(TAG, "callPluginApplicationCreate: " + app.getApplicationInfo().packageName);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
     }
