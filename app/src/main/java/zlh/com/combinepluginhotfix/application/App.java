@@ -19,8 +19,10 @@ import zlh.com.combinepluginhotfix.tool.PH;
 public class App extends Application {
     private static final String TAG = "App";
     private static final String PLUGIN_ONE = "PluginOne.apk";
+    private static final String PLUGIN_JNI = "Jni.apk";
     public static final String SOURCE_PKGNAME = "zlh.com.combinepluginhotfix";
     public static final String PLUGIN_ONE_PKGNAME = "nim.shs1330.netease.com.pluginone";
+    public static final String PLUGIN_JNI_PKGNAME = "netease.com.jnisot";
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
@@ -31,8 +33,10 @@ public class App extends Application {
         ProxyPackageManagerService.hook();
         HookCallback.hook();
 
+        FileHelper.extractAssets(PLUGIN_JNI);
         FileHelper.extractAssets(PLUGIN_ONE);
-        ApkLoader.hook(getFileStreamPath(PLUGIN_ONE));
+        ApkLoader.hook(getFileStreamPath(PLUGIN_JNI), null);
+        ApkLoader.hook(getFileStreamPath(PLUGIN_ONE), ApkLoader.getPluginClassLoader(PLUGIN_JNI_PKGNAME));
     }
 
     @Override

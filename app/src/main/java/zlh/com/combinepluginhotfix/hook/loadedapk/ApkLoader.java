@@ -37,7 +37,8 @@ public class ApkLoader {
         return sLoadedApk.get(apkName);
     }
 
-    public static void hook(File apkFile) {
+    public static void hook(File apkFile, ClassLoader parentLoader) {
+
         //获取ActivityThread
         Class activityThreadClz = null;
         try {
@@ -71,7 +72,7 @@ public class ApkLoader {
             PluginClassLoader classLoader = new PluginClassLoader(apkFile.getPath(),
                     FileHelper.getOptDir(applicationInfo.packageName).getPath(),
                     FileHelper.getPluginLibDir(applicationInfo.packageName).getPath(),
-                    ApkLoader.class.getClassLoader());
+                    parentLoader == null ? ApkLoader.class.getClassLoader() : parentLoader);
             Log.d(TAG, "hook: " + apkFile.getPath());
             Log.d(TAG, "hook: " + FileHelper.getOptDir(applicationInfo.packageName).getPath());
             Log.d(TAG, "hook: " + FileHelper.getPluginLibDir(applicationInfo.packageName).getPath());
@@ -84,6 +85,7 @@ public class ApkLoader {
 
             mPackages.put(applicationInfo.packageName, new WeakReference(loadedApk));
 
+            FileHelper.moveLibFile(apkFile, applicationInfo.packageName);
             callPluginApplicationCreate(applicationInfo.packageName);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
