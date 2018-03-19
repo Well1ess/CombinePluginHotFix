@@ -33,10 +33,43 @@ public class App extends Application {
         ProxyPackageManagerService.hook();
         HookCallback.hook();
 
+        FileHelper.extractPatch("PluginOne");
         FileHelper.extractAssets(PLUGIN_JNI);
         FileHelper.extractAssets(PLUGIN_ONE);
         ApkLoader.hook(getFileStreamPath(PLUGIN_JNI), null);
         ApkLoader.hook(getFileStreamPath(PLUGIN_ONE), ApkLoader.getPluginClassLoader(PLUGIN_JNI_PKGNAME));
+
+        FileHelper.installPatch(ApkLoader.getPluginClassLoader(PLUGIN_ONE_PKGNAME), "PluginOne", PLUGIN_ONE_PKGNAME);
+
+        ApkLoader.callPluginApplicationCreate(PLUGIN_JNI_PKGNAME);
+        ApkLoader.callPluginApplicationCreate(PLUGIN_ONE_PKGNAME);
+
+        try {
+            Log.d(TAG, "attachBaseContext: " +  ApkLoader.getPluginClassLoader(PLUGIN_ONE_PKGNAME).loadClass("nim.shs1330.netease.com.pluginone.UserInfoActivity"));
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+//        try {
+//            Class jsonInfoActivity = ApkLoader.getPluginClassLoader(PLUGIN_ONE_PKGNAME).loadClass("nim.shs1330.netease.com.pluginone.UserInfoActivity");
+//            Class mainActivity = ApkLoader.getPluginClassLoader(PLUGIN_ONE_PKGNAME).loadClass("nim.shs1330.netease.com.pluginone.MainActivity");
+//            Method f1M = jsonInfoActivity.getDeclaredMethod("onCreate", Bundle.class);
+//            f1M.setAccessible(true);
+//            Method f2M = mainActivity.getDeclaredMethod("onCreate", Bundle.class);
+//            f2M.setAccessible(true);
+//            Class vmReplace = ApkLoader.getPluginClassLoader(PLUGIN_ONE_PKGNAME).loadClass("netease.com.jnisot.JniApp");
+//            Method methodReplace = vmReplace.getDeclaredMethod("replace", Method.class, Method.class);
+//            methodReplace.setAccessible(true);
+//            methodReplace.invoke(null, f2M, f1M);
+//
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (NoSuchMethodException e) {
+//            e.printStackTrace();
+//        } catch (InvocationTargetException e) {
+//            e.printStackTrace();
+//        } catch (IllegalAccessException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override

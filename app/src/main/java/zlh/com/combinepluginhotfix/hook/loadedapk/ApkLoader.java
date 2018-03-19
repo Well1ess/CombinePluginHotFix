@@ -81,12 +81,12 @@ public class ApkLoader {
             mClassLoaderFieldField.set(loadedApk, classLoader);
 
             sPluginClassLoader.put(applicationInfo.packageName, classLoader);
+            Log.d(TAG, "hook:  " + applicationInfo.packageName + classLoader);
             sLoadedApk.put(applicationInfo.packageName, loadedApk);
 
             mPackages.put(applicationInfo.packageName, new WeakReference(loadedApk));
 
             FileHelper.moveLibFile(apkFile, applicationInfo.packageName);
-            callPluginApplicationCreate(applicationInfo.packageName);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
@@ -102,7 +102,7 @@ public class ApkLoader {
         }
     }
 
-    private static void callPluginApplicationCreate(String packageName) {
+    public static void callPluginApplicationCreate(String packageName) {
         Class loadedApk = sLoadedApk.get(packageName).getClass();
         try {
             Method makeApplication = loadedApk.getDeclaredMethod("makeApplication", boolean.class, Instrumentation.class);

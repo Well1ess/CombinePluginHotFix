@@ -9,8 +9,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
-import zlh.com.combinepluginhotfix.application.App;
 import zlh.com.combinepluginhotfix.hook.loadedapk.ApkLoader;
+
+import static zlh.com.combinepluginhotfix.application.App.PLUGIN_ONE_PKGNAME;
+
+/**
+ * 方法以及运行则不能加载
+ */
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -18,8 +23,10 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "MainActivity: ");
     }
 
+
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         findViewById(R.id.tv_show).setOnClickListener(new View.OnClickListener() {
@@ -36,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                ClassLoader classLoader = ApkLoader.getPluginClassLoader(App.PLUGIN_ONE_PKGNAME);
+                ClassLoader classLoader = ApkLoader.getPluginClassLoader(PLUGIN_ONE_PKGNAME);
                 try {
                     Class fragmentClazz = classLoader.loadClass("nim.shs1330.netease.com.pluginone.PluginOneMainFragment");
                     Fragment fragment = (Fragment) fragmentClazz.newInstance();
@@ -51,8 +58,5 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-
-
     }
 }
