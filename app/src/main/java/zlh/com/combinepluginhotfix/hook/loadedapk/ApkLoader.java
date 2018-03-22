@@ -6,16 +6,24 @@ import android.content.pm.ApplicationInfo;
 import android.util.Log;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import dalvik.system.DexClassLoader;
+import dalvik.system.DexFile;
 import zlh.com.combinepluginhotfix.hook.classloader.PluginClassLoader;
 import zlh.com.combinepluginhotfix.hook.instrumentation.CustomInstrumentation;
 import zlh.com.combinepluginhotfix.tool.FileHelper;
+import zlh.com.combinepluginhotfix.tool.PH;
+
+import static zlh.com.combinepluginhotfix.tool.FileHelper.getOptDir;
 
 /**
  * Created by shs1330 on 2018/3/14.
@@ -70,11 +78,11 @@ public class ApkLoader {
 //                    FileHelper.getPluginLibDir(applicationInfo.packageName).getPath(),
 //                    ClassLoader.getSystemClassLoader());
             PluginClassLoader classLoader = new PluginClassLoader(apkFile.getPath(),
-                    FileHelper.getOptDir(applicationInfo.packageName).getPath(),
+                    getOptDir(applicationInfo.packageName).getPath(),
                     FileHelper.getPluginLibDir(applicationInfo.packageName).getPath(),
                     parentLoader == null ? ApkLoader.class.getClassLoader() : parentLoader);
             Log.d(TAG, "hook: " + apkFile.getPath());
-            Log.d(TAG, "hook: " + FileHelper.getOptDir(applicationInfo.packageName).getPath());
+            Log.d(TAG, "hook: " + getOptDir(applicationInfo.packageName).getPath());
             Log.d(TAG, "hook: " + FileHelper.getPluginLibDir(applicationInfo.packageName).getPath());
             Field mClassLoaderFieldField = loadedApk.getClass().getDeclaredField("mClassLoader");
             mClassLoaderFieldField.setAccessible(true);
@@ -98,6 +106,65 @@ public class ApkLoader {
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void installPatch(String packagName, String patchName) {
+        File sourcePatch = PH.getBaseContext().getFileStreamPath(patchName+ ".zip");
+        File optDex = new File(FileHelper.getOptDir(packagName) + "/" + packagName + "dex");
+        if(!optDex.exists()) {
+            try {
+                optDex.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        hookParentClassLoader(ApkLoader.getPluginClassLoader(packagName), sourcePatch, optDex);
+    }
+
+    private static void hookParentClassLoader(ClassLoader classLoader, File apkFile, File optDex) {
+        //LoadedApk中mClassLoader由BaseDexClassLoader中的Element数组获取生成
+        //我们通过反射构造自己的Apk对应的Element加到BaseDexClassLoader中就可以委托系统帮我
+        //们生成对应的ClassLoader
+        try {
+            Field pathListF = DexClassLoader.class.getSuperclass().getDeclaredField("pathList");
+            pathListF.setAccessible(true);
+            //获取唯一的List的Object
+            Object pathList = pathListF.get(classLoader);
+
+            Field dexElementsF = pathList.getClass().getDeclaredField("dexElements");
+            dexElementsF.setAccessible(true);
+            //获取Element数组
+            Object[] dexElements = (Object[]) dexElementsF.get(pathList);
+
+            Class elementClass = dexElements.getClass().getComponentType();
+
+            //新的数组
+            Object[] newDexElements = (Object[]) Array.newInstance(elementClass, dexElements.length + 1);
+            Constructor constructor = elementClass.getConstructor(File.class, boolean.class, File.class, DexFile.class);
+
+            //我们apk对应的element
+            Object customElement = constructor.newInstance(apkFile, false, apkFile, DexFile.loadDex(apkFile.getCanonicalPath(), optDex.getAbsolutePath(), 0));
+
+            Object[] addArray = new Object[]{customElement};
+
+            System.arraycopy(dexElements, 0, newDexElements, 0, dexElements.length);
+            System.arraycopy(addArray, 0, newDexElements, dexElements.length, addArray.length);
+
+            //替换
+            dexElementsF.set(pathList, newDexElements);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
     }

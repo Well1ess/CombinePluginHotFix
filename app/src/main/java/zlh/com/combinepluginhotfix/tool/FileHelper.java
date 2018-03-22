@@ -15,7 +15,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,7 +25,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import dalvik.system.DexClassLoader;
-import dalvik.system.DexFile;
 
 /**
  * 用于控制file的路径
@@ -41,7 +39,7 @@ public class FileHelper {
         InputStream is = null;
         FileOutputStream fos = null;
         try {
-            is = am.open(pathName + ".patch");
+            is = am.open(pathName);
             File extractFile = PH.getBaseContext().getFileStreamPath(pathName + ".zip");
             fos = new FileOutputStream(extractFile);
             byte[] buffer = new byte[1024];
@@ -60,65 +58,6 @@ public class FileHelper {
                 e.printStackTrace();
             }
 
-        }
-    }
-
-    public static void installPatch(ClassLoader classLoader, String patchName, String packagName) {
-        File sourcePatch = PH.getBaseContext().getFileStreamPath(patchName+ ".zip");
-        File optDex = new File(getOptDir(packagName) + "/" + packagName + "dex");
-        if(!optDex.exists()) {
-            try {
-                optDex.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        hookParentClassLoader(classLoader, sourcePatch, optDex);
-    }
-
-    public static void hookParentClassLoader(ClassLoader classLoader, File apkFile, File optDex) {
-        //LoadedApk中mClassLoader由BaseDexClassLoader中的Element数组获取生成
-        //我们通过反射构造自己的Apk对应的Element加到BaseDexClassLoader中就可以委托系统帮我
-        //们生成对应的ClassLoader
-        try {
-            Field pathListF = DexClassLoader.class.getSuperclass().getDeclaredField("pathList");
-            pathListF.setAccessible(true);
-            //获取唯一的List的Object
-            Object pathList = pathListF.get(classLoader);
-
-            Field dexElementsF = pathList.getClass().getDeclaredField("dexElements");
-            dexElementsF.setAccessible(true);
-            //获取Element数组
-            Object[] dexElements = (Object[]) dexElementsF.get(pathList);
-
-            Class elementClass = dexElements.getClass().getComponentType();
-
-            //新的数组
-            Object[] newDexElements = (Object[]) Array.newInstance(elementClass, dexElements.length + 1);
-            Constructor constructor = elementClass.getConstructor(File.class, boolean.class, File.class, DexFile.class);
-
-            //我们apk对应的element
-            Object customElement = constructor.newInstance(apkFile, false, apkFile, DexFile.loadDex(apkFile.getCanonicalPath(), optDex.getAbsolutePath(), 0));
-
-            Object[] addArray = new Object[]{customElement};
-
-            System.arraycopy(dexElements, 0, newDexElements, 0, dexElements.length);
-            System.arraycopy(addArray, 0, newDexElements, dexElements.length, addArray.length);
-
-            //替换
-            dexElementsF.set(pathList, newDexElements);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
         }
     }
 
@@ -210,7 +149,7 @@ public class FileHelper {
      * @return data/data/<packageName>/files/plugin/<PlugInPackageName>/lib
      */
     public static File getPluginLibDir(String packagName) {
-
+        enforeFileExists(new File(getBasePluginDir(packagName), "lib"));
         return enforeFileExists(new File(getBasePluginDir(packagName), "lib/x86"));
     }
 
@@ -226,15 +165,16 @@ public class FileHelper {
                     break;
                 }
                 String name = entry.getName();
-                if (name.startsWith("lib/") && name.endsWith(".so")) {
+                if (name.startsWith("lib/x86/") && name.endsWith(".so")) {
                     File libDir = new File(FileHelper.getPluginLibDir(pkgName).getPath()
                             + name.substring(name.indexOf('/'), name.lastIndexOf('/')));
                     if (!libDir.exists()) {
                         libDir.mkdir();
                     }
-                    File libFile = new File(FileHelper.getPluginLibDir(pkgName).getPath()
-                            + name.substring(name.indexOf('/')));
+                    File libFile = new File(FileHelper.enforeFileExists(new File(FileHelper.getBasePluginDir(pkgName), "lib/x86")).getPath()
+                            + name.substring(name.lastIndexOf('/')));
                     libFile.createNewFile();
+                    Log.d(TAG, "moveLibFile: " + libFile.getPath());
                     FileOutputStream fos = new FileOutputStream(libFile);
                     byte[] arrayOfbytes = new byte[1024];
                     while (true) {
