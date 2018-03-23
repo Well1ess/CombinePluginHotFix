@@ -9,7 +9,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import zlh.com.combinepluginhotfix.StubActivity;
+import zlh.com.combinepluginhotfix.activity.StubActivity;
 
 /**
  * Created by shs1330 on 2018/3/12.

@@ -1,0 +1,22 @@
+[{
+  "apkName": "Jni.apk",
+  "packageName": "netease.com.jnisot",
+  "apkMainType": "",
+  "apkMain": "",
+  "dependPlugin":"",
+  "version": "1.0"
+}, {
+  "apkName": "PluginOne.apk",
+  "packageName": "nim.shs1330.netease.com.pluginone",
+  "apkMainType": "Fragment",
+  "apkMain": "nim.shs1330.netease.com.pluginone.PluginOneMainFragment",
+  "dependPlugin":"netease.com.jnisot",
+  "version": "1.0"
+}, {
+  "apkName": "PluginTwo.apk",
+  "packageName": "zlh.com.plugintwo",
+  "apkMainType": "Fragment",
+  "apkMain": "zlh.com.plugintwo.PluginTwoMainFragment",
+  "dependPlugin":"netease.com.jnisot",
+  "version": "1.0"
+}]

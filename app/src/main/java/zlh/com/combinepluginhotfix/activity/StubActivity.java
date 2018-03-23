@@ -1,8 +1,10 @@
-package zlh.com.combinepluginhotfix;
+package zlh.com.combinepluginhotfix.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+
+import zlh.com.combinepluginhotfix.R;
 
 /**
  * Created by shs1330 on 2018/3/12.
