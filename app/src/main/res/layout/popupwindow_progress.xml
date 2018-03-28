@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llyt_progress"
+    android:visibility="gone"
+    android:layout_width="313dp"
+    android:layout_height="61dp"
+    android:layout_marginTop="10dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:orientation="horizontal"
+    android:layout_below="@+id/tv_title">
+
+    <ProgressBar
+        android:id="@+id/pb_process"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:max="100"
+        android:progress="0" />
+
+</LinearLayout>

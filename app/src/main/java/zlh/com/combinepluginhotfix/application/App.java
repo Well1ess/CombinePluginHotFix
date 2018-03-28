@@ -2,8 +2,6 @@ package zlh.com.combinepluginhotfix.application;
 
 import android.app.Application;
 import android.content.Context;
-import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.List;
 
@@ -43,26 +41,26 @@ public class App extends Application {
         ProxyPackageManagerService.hook();
         HookCallback.hook();
 
-        for (int i = 0; i < pluginInfos.size(); i++) {
-            Log.d(TAG, "attachBaseContext: " + pluginInfos.get(i).apkName);
-            FileHelper.extractAssets(pluginInfos.get(i).apkName);
-            ApkLoader.hook(getFileStreamPath(pluginInfos.get(i).apkName), TextUtils.isEmpty(pluginInfos.get(i).dependPlugin) ? null : ApkLoader.getPluginClassLoader(pluginInfos.get(i).dependPlugin));
-            ApkLoader.callPluginApplicationCreate(pluginInfos.get(i).packName);
-        }
-//        FileHelper.extractAssets(PLUGIN_JNI);
-//        FileHelper.extractAssets(PLUGIN_ONE);
-//        FileHelper.extractAssets(PLUGIN_TWO);
-//        FileHelper.extractPatch(PATCH_P_ONE);
-//
-//        ApkLoader.hook(getFileStreamPath(PLUGIN_JNI), null);
-//        ApkLoader.hook(getFileStreamPath(PLUGIN_ONE), ApkLoader.getPluginClassLoader(PLUGIN_JNI_PKGNAME));
-//        ApkLoader.hook(getFileStreamPath(PLUGIN_TWO), ApkLoader.getPluginClassLoader(PLUGIN_JNI_PKGNAME));
-//
-//        ApkLoader.installPatch(PLUGIN_ONE_PKGNAME, PATCH_P_ONE);
-//
-//        ApkLoader.callPluginApplicationCreate(PLUGIN_JNI_PKGNAME);
-//        ApkLoader.callPluginApplicationCreate(PLUGIN_ONE_PKGNAME);
-//        ApkLoader.callPluginApplicationCreate(PLUGIN_TWO_PKGNAME);
+//        for (int i = 0; i < pluginInfos.size(); i++) {
+//            Log.d(TAG, "attachBaseContext: " + pluginInfos.get(i).apkName);
+//            FileHelper.extractAssets(pluginInfos.get(i).apkName);
+//            ApkLoader.hook(getFileStreamPath(pluginInfos.get(i).apkName), TextUtils.isEmpty(pluginInfos.get(i).dependPlugin) ? null : ApkLoader.getPluginClassLoader(pluginInfos.get(i).dependPlugin));
+//            ApkLoader.callPluginApplicationCreate(pluginInfos.get(i).packName);
+//        }
+        FileHelper.extractAssets(PLUGIN_JNI);
+        FileHelper.extractAssets(PLUGIN_ONE);
+        FileHelper.extractAssets(PLUGIN_TWO);
+        FileHelper.extractPatch(PATCH_P_ONE);
+
+        ApkLoader.hook(getFileStreamPath(PLUGIN_JNI), null);
+        ApkLoader.hook(getFileStreamPath(PLUGIN_ONE), ApkLoader.getPluginClassLoader(PLUGIN_JNI_PKGNAME));
+        ApkLoader.hook(getFileStreamPath(PLUGIN_TWO), ApkLoader.getPluginClassLoader(PLUGIN_JNI_PKGNAME));
+
+        ApkLoader.installPatch(PLUGIN_ONE_PKGNAME, PATCH_P_ONE);
+
+        ApkLoader.callPluginApplicationCreate(PLUGIN_JNI_PKGNAME);
+        ApkLoader.callPluginApplicationCreate(PLUGIN_ONE_PKGNAME);
+        ApkLoader.callPluginApplicationCreate(PLUGIN_TWO_PKGNAME);
     }
 
     @Override
