@@ -119,6 +119,34 @@ public class FileHelper {
         }
     }
 
+    enum DownloadType {
+        Apk, Patch
+    }
+
+    public static void storeFile(String sourceName, byte[] result) {
+        DownloadType type = DownloadType.Apk;
+        if (sourceName.endsWith(".patch")) {
+            type = DownloadType.Patch;
+        }
+
+        FileOutputStream fos = null;
+        try {
+            File extractFile = PH.getBaseContext().getFileStreamPath(sourceName);
+            fos = new FileOutputStream(extractFile);
+
+            fos.write(result, 0, result.length);
+            fos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     /**
      * 返回对应plugin包名路径下的基础路径

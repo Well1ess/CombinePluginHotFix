@@ -9,13 +9,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import zlh.com.combinepluginhotfix.R;
+import zlh.com.combinepluginhotfix.bean.BookOuterClass;
 import zlh.com.combinepluginhotfix.download.DownloadPatchTask;
 import zlh.com.combinepluginhotfix.download.NewPatchTipDialog;
 import zlh.com.combinepluginhotfix.hook.loadedapk.ApkLoader;
+import zlh.com.combinepluginhotfix.tool.Tags;
 
 import static zlh.com.combinepluginhotfix.application.App.PLUGIN_ONE_PKGNAME;
 import static zlh.com.combinepluginhotfix.application.App.PLUGIN_TWO_PKGNAME;
@@ -28,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String TAG = "MainActivity";
     private ProgressBar progressBar;
     private PopupWindow popupWindow;
+    public ImageView downImage;
 
     public MainActivity() {
         Log.d(TAG, "MainActivity: ");
@@ -47,10 +53,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        downImage = (ImageView) findViewById(R.id.iv_download);
         findViewById(R.id.bt_plugone).setOnClickListener(this);
         findViewById(R.id.bt_plugtwo).setOnClickListener(this);
         findViewById(R.id.tv_dialog).setOnClickListener(this);
+        BookOuterClass.Book book = BookOuterClass.Book.newBuilder()
+                .setId(1001)
+                .setName("Android")
+                .setDesc("书籍推荐")
+                .build();
 
+        try {
+            BookOuterClass.Book b2 = BookOuterClass.Book.parseFrom(book.toByteArray());
+            Log.d(TAG, "onCreate: " + b2.toString());
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+        }
     }
 
     public void publishProgress(float percent) {
@@ -107,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         public void onClick(View view, PopupWindow popupWindow) {
                             progressBar = (ProgressBar) view.findViewById(R.id.pb_process);
                             MainActivity.this.popupWindow = popupWindow;
-                            new DownloadPatchTask(MainActivity.this).execute("http");
+                            new DownloadPatchTask(MainActivity.this).execute(Tags.spluginDownload);
                         }
                     })
                     .show(findViewById(R.id.flyt_contrainer), Gravity.CENTER, 0, 0);
