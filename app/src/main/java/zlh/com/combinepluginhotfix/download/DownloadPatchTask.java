@@ -41,6 +41,7 @@ public class DownloadPatchTask extends AsyncTask<String, Integer, String> {
         super.onPostExecute(s);
         activity.dismissDialog();
         activity.downImage.setImageBitmap(BitmapFactory.decodeByteArray(result, 0, result.length));
+
     }
 
     private String download(String str) {

@@ -1,0 +1,9 @@
+[{
+  "apkName": "Jni.apk",
+  "version": "1.01",
+  "patchName":"Jni101.patch"
+}, {
+  "apkName": "Jni.apk",
+  "version": "1.02",
+  "patchName":"Jni102.patch"
+}]
