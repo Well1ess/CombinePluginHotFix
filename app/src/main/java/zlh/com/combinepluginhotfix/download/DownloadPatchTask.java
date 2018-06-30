@@ -12,6 +12,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import zlh.com.combinepluginhotfix.activity.MainActivity;
+import zlh.com.combinepluginhotfix.hook.loadedapk.ApkLoader;
+import zlh.com.combinepluginhotfix.tool.FileHelper;
+
+import static zlh.com.combinepluginhotfix.application.App.PLUGIN_JNI_PKGNAME;
+import static zlh.com.combinepluginhotfix.application.App.PLUGIN_TWO_PKGNAME;
+import static zlh.com.combinepluginhotfix.tool.PH.getBaseContext;
 
 /**
  * Created by shs1330 on 2018/3/28.
@@ -24,10 +30,13 @@ public class DownloadPatchTask extends AsyncTask<String, Integer, String> {
     public DownloadPatchTask(MainActivity activity) {
         this.activity = activity;
     }
-
+    private String apkName;
+    private String downType;
     @Override
     protected String doInBackground(String... params) {
-        return download(params[0]);
+        apkName = params[0];
+        downType = params[1];
+        return download(params[2]);
     }
 
     @Override
@@ -42,6 +51,11 @@ public class DownloadPatchTask extends AsyncTask<String, Integer, String> {
         activity.dismissDialog();
         activity.downImage.setImageBitmap(BitmapFactory.decodeByteArray(result, 0, result.length));
 
+        FileHelper.storeFile(apkName, downType, result);
+        if (downType.equals("Apk")) {
+            ApkLoader.hook(getBaseContext().getFileStreamPath(apkName), ApkLoader.getPluginClassLoader(PLUGIN_JNI_PKGNAME));
+            ApkLoader.callPluginApplicationCreate(PLUGIN_TWO_PKGNAME);
+        }
     }
 
     private String download(String str) {

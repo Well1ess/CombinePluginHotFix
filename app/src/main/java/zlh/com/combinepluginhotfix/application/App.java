@@ -3,15 +3,12 @@ package zlh.com.combinepluginhotfix.application;
 import android.app.Application;
 import android.content.Context;
 
-import java.util.List;
-
 import zlh.com.combinepluginhotfix.hook.ams.ProxyActivityManagerService;
 import zlh.com.combinepluginhotfix.hook.h.HookCallback;
 import zlh.com.combinepluginhotfix.hook.instrumentation.CustomInstrumentation;
 import zlh.com.combinepluginhotfix.hook.loadedapk.ApkLoader;
 import zlh.com.combinepluginhotfix.hook.pms.ProxyPackageManagerService;
 import zlh.com.combinepluginhotfix.tool.FileHelper;
-import zlh.com.combinepluginhotfix.tool.JSONParser;
 import zlh.com.combinepluginhotfix.tool.PH;
 
 /**
@@ -34,7 +31,6 @@ public class App extends Application {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         PH.init(base);
-        List<JSONParser.PluginInfo> pluginInfos = JSONParser.parser();
 
         CustomInstrumentation.hook();
         ProxyActivityManagerService.hook();
@@ -50,6 +46,7 @@ public class App extends Application {
         FileHelper.extractAssets(PLUGIN_JNI);
         FileHelper.extractAssets(PLUGIN_ONE);
         FileHelper.extractAssets(PLUGIN_TWO);
+
         FileHelper.extractPatch(PATCH_P_ONE);
 
         ApkLoader.hook(getFileStreamPath(PLUGIN_JNI), null);

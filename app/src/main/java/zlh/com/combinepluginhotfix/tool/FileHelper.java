@@ -6,6 +6,7 @@ package zlh.com.combinepluginhotfix.tool;
 
 import android.content.res.AssetManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -25,6 +26,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import dalvik.system.DexClassLoader;
+
+import static zlh.com.combinepluginhotfix.tool.FileHelper.DownloadType.Apk;
+import static zlh.com.combinepluginhotfix.tool.FileHelper.DownloadType.Patch;
 
 /**
  * 用于控制file的路径
@@ -99,7 +103,10 @@ public class FileHelper {
         try {
             is = am.open(sourceName);
             File extractFile = PH.getBaseContext().getFileStreamPath(sourceName);
+            if (extractFile.exists())
+               return;
             fos = new FileOutputStream(extractFile);
+
             byte[] buffer = new byte[1024];
             int count = 0;
             while ((count = is.read(buffer)) > 0) {
@@ -110,8 +117,10 @@ public class FileHelper {
             e.printStackTrace();
         } finally {
             try {
-                is.close();
-                fos.close();
+                if (is != null)
+                    is.close();
+                if (fos != null)
+                    fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -123,16 +132,28 @@ public class FileHelper {
         Apk, Patch
     }
 
-    public static void storeFile(String sourceName, byte[] result) {
-        DownloadType type = DownloadType.Apk;
-        if (sourceName.endsWith(".patch")) {
-            type = DownloadType.Patch;
+    public static void storeFile(String sourceName, String downType, byte[] result) {
+
+        if (result == null)
+            Toast.makeText(PH.getBaseContext(), "下载失败", Toast.LENGTH_SHORT);
+
+        DownloadType type = Apk;
+        if (downType.equals("Patch")) {
+            type = Patch;
+        }
+
+        switch (type) {
+            case Apk:
+                //TODO: 清空本地插件
+                break;
+            case Patch:
+                break;
         }
 
         FileOutputStream fos = null;
         try {
             File extractFile = PH.getBaseContext().getFileStreamPath(sourceName);
-            fos = new FileOutputStream(extractFile);
+            fos = new FileOutputStream(extractFile, false);
 
             fos.write(result, 0, result.length);
             fos.flush();

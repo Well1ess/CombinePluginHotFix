@@ -16,11 +16,11 @@ import static zlh.com.combinepluginhotfix.tool.JSONParser.Version;
  */
 public class PluginInfo {
     public String apkName;
-    public String packName;
+    public String packageName;
     public String apkMainType;
     public String apkMain;
     public String dependPlugin;
-    public String version;
+    public float version;
 
     public static PluginInfo CreatePluginInfo(JSONObject jsonObject) {
         try {
@@ -42,18 +42,18 @@ public class PluginInfo {
 
     public PluginInfo(String apkName, String packName, String apkMainType, String apkMain, String dependPlugin, String version) {
         this.apkName = apkName;
-        this.packName = packName;
+        this.packageName = packName;
         this.apkMainType = apkMainType;
         this.apkMain = apkMain;
         this.dependPlugin = dependPlugin;
-        this.version = version;
+        this.version = Float.parseFloat(version);
     }
 
     @Override
     public String toString() {
         return "PluginInfo{" +
                 "apkName='" + apkName + '\'' +
-                ", packName='" + packName + '\'' +
+                ", packName='" + packageName + '\'' +
                 ", apkMainType='" + apkMainType + '\'' +
                 ", apkMain='" + apkMain + '\'' +
                 ", dependPlugin='" + dependPlugin + '\'' +

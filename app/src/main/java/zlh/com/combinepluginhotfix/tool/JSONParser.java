@@ -34,6 +34,7 @@ public class JSONParser {
     public final static String ApkMain = "apkMain";
     public final static String DependPlugin = "dependPlugin";
     public final static String Version = "version";
+    public final static String DownloadUrl = "downloadUrl";
 
     public final static String PatchName = "patchName";
 
@@ -52,7 +53,6 @@ public class JSONParser {
             while (inputStream.read(buf) > 0) {
                 jsonContent += new String(buf, "utf-8");
             }
-
             try {
                 JSONArray jsonArray = new JSONArray(jsonContent);
                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -72,11 +72,40 @@ public class JSONParser {
         return pluginInfos;
     }
 
+    public static List<PluginInfo> parser(String content) {
+        ArrayList<PluginInfo> pluginInfos = new ArrayList<>();
+        try {
+            JSONArray jsonArray = new JSONArray(content);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                pluginInfos.add(PluginInfo.CreatePluginInfo(jsonObject));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return pluginInfos;
+    }
+
+    public static List<UpdateInfo> parserUpdateInfo(String content) {
+        ArrayList<UpdateInfo> updateInfos = new ArrayList<>();
+        try {
+            JSONArray jsonArray = new JSONArray(content);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                updateInfos.add(UpdateInfo.CreateUpdateInfo(jsonObject));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return updateInfos;
+    }
+
     /**
      * 解析patch json
+     *
      * @param patchJsonPath
      */
-    public static List<PatchInfo> ParserPatch(String patchJsonPath) {
+    public static List<PatchInfo> parserPatch(String patchJsonPath) {
         PatchInfoListComparator comparator = new PatchInfoListComparator();
         File file = PH.getBaseContext().getFileStreamPath(patchJsonPath);
         InputStream inputStream = null;
@@ -110,8 +139,7 @@ public class JSONParser {
         return patchInfos;
     }
 
-    public static class PatchInfoListComparator implements Comparator<PatchInfo>
-    {
+    public static class PatchInfoListComparator implements Comparator<PatchInfo> {
 
         @Override
         public int compare(PatchInfo o1, PatchInfo o2) {

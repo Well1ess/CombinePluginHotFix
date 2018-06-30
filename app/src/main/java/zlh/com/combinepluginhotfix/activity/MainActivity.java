@@ -13,14 +13,23 @@ import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 
+import com.google.gson.Gson;
 import com.google.protobuf.InvalidProtocolBufferException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import zlh.com.combinepluginhotfix.R;
 import zlh.com.combinepluginhotfix.bean.BookOuterClass;
 import zlh.com.combinepluginhotfix.download.DownloadPatchTask;
+import zlh.com.combinepluginhotfix.download.JsonLoadTask;
 import zlh.com.combinepluginhotfix.download.NewPatchTipDialog;
 import zlh.com.combinepluginhotfix.hook.loadedapk.ApkLoader;
+import zlh.com.combinepluginhotfix.tool.JSONParser;
+import zlh.com.combinepluginhotfix.tool.JSONWriter;
+import zlh.com.combinepluginhotfix.tool.PluginInfo;
 import zlh.com.combinepluginhotfix.tool.Tags;
+import zlh.com.combinepluginhotfix.tool.UpdateInfo;
 
 import static zlh.com.combinepluginhotfix.application.App.PLUGIN_ONE_PKGNAME;
 import static zlh.com.combinepluginhotfix.application.App.PLUGIN_TWO_PKGNAME;
@@ -35,14 +44,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private PopupWindow popupWindow;
     public ImageView downImage;
 
+    private List<PluginInfo> networkPluginList = new ArrayList<>();
+
     public MainActivity() {
         Log.d(TAG, "MainActivity: ");
+    }
+
+    public void setNetworkPluginList(List<UpdateInfo> infos) {
+        final List<UpdateInfo> mustUpdate = new ArrayList();
+        for (int i = 0; i < infos.size(); i++) {
+            for (int j = 0; j < networkPluginList.size(); j++) {
+                if (networkPluginList.get(j).apkName.equals(infos.get(i).apkName)) {
+                    if (networkPluginList.get(j).version < infos.get(i).version) {
+                        networkPluginList.get(j).version = infos.get(i).version;
+                        mustUpdate.add(infos.get(i));
+                    }
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < mustUpdate.size(); i++) {
+            final UpdateInfo info = mustUpdate.get(i);
+            new NewPatchTipDialog.Builder(this)
+                    .create()
+                    .setPositiveButton(new NewPatchTipDialog.OnPopWindowClickListener() {
+                        @Override
+                        public void onClick(View view, PopupWindow popupWindow) {
+                            progressBar = (ProgressBar) view.findViewById(R.id.pb_process);
+                            MainActivity.this.popupWindow = popupWindow;
+                            new DownloadPatchTask(MainActivity.this).execute(info.apkName, info.apkMainType, info.downloadUrl);
+                            String newPluginSetting =  new Gson().toJson(networkPluginList);
+                            JSONWriter.Writer(newPluginSetting, JSONParser.PluginSetting);
+                        }
+                    })
+                    .show(findViewById(R.id.flyt_contrainer), Gravity.CENTER, 0, 0);
+        }
+
+
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        networkPluginList = JSONParser.parser();
+        new JsonLoadTask(MainActivity.this).execute(Tags.sUpdateInfos);
+
         findViewById(R.id.tv_show).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
