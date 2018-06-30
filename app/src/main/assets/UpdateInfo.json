@@ -6,6 +6,6 @@
 }, {
   "apkName": "PluginTwo.apk",
   "apkMainType": "Apk",
-  "downloadUrl": "zlh.com.plugintwo.PluginTwoMainFragment",
+  "downloadUrl": "https://github.com/Well1ess/CombinePluginHotFix/blob/master/app/src/main/assets/PluginTwo-New.apk?raw=true",
   "version": "1.1"
 }]
