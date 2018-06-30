@@ -1,0 +1,11 @@
+[{
+  "apkName": "PluginOne.apk",
+  "apkMainType": "Apk",
+  "downloadUrl":"netease.com.jnisot",
+  "version": "1.0"
+}, {
+  "apkName": "PluginTwo.apk",
+  "apkMainType": "Apk",
+  "downloadUrl": "zlh.com.plugintwo.PluginTwoMainFragment",
+  "version": "1.1"
+}]
